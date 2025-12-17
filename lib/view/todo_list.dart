@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_provider_ex01/provider/todo_provider.dart';
+import 'package:flutter_provider_ex01/view/todo_add.dart';
+import 'package:flutter_provider_ex01/view/todo_delete.dart';
+import 'package:flutter_provider_ex01/view/todo_detail.dart';
 import 'package:provider/provider.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class TodoList extends StatefulWidget {
+  const TodoList({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<TodoList> createState() => _TodoListState();
 }
 
-class _HomeState extends State<Home> {
+class _TodoListState extends State<TodoList> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<TodoProvider>();
@@ -26,7 +29,11 @@ class _HomeState extends State<Home> {
             return ListTile(
               title: Row(
                 children: [
-                  Icon(todo.isComplate ? Icons.check : Icons.check_box_sharp),
+                  Icon(
+                    todo.isComplate
+                        ? Icons.check_box_outlined
+                        : Icons.check_box_outline_blank_sharp,
+                  ),
                   Text(todo.todoTitle),
                 ],
               ),
@@ -35,33 +42,25 @@ class _HomeState extends State<Home> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    onPressed: () => AlertDialog(
-                      content: const Text('삭제하시겠습니까?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Text('취소'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            provider.deleteToTodoList(todo: todo);
-                          },
-                          child: const Text('삭제'),
-                        ),
-                      ],
-                    ),
+                    onPressed: () => showDeleteTodoDialog(todo: todo, context: context),
                     icon: const Icon(Icons.delete),
                   ),
-                  IconButton(onPressed: () {}, icon: const Icon(Icons.open_in_new)),
+                  IconButton(
+                    onPressed: () => showUpdateTodoBottomSheet(todo: todo, context: context),
+                    icon: const Icon(Icons.open_in_new),
+                  ),
                 ],
               ),
             );
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(onPressed: () {}),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showAddTodoBottomSheet(context);
+        },
+        child: const Icon(Icons.add),
+      ),
     );
   }
 }

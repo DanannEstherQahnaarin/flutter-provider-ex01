@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_provider_ex01/models/todo.dart';
 
-void showTodoDetail({required Todo todo, required BuildContext context}) {
+void showUpdateTodoBottomSheet({required Todo todo, required BuildContext context}) {
   final formKey = GlobalKey<FormState>();
   final TextEditingController txtTitleController = TextEditingController(text: todo.todoTitle);
   final TextEditingController txtContentController = TextEditingController(
@@ -9,12 +9,13 @@ void showTodoDetail({required Todo todo, required BuildContext context}) {
   );
   DateTime? selectedDate = todo.todoComplateDate;
 
-  showBottomSheet(
+  showModalBottomSheet(
     context: context,
+    isScrollControlled: true,
     builder: (context) => StatefulBuilder(
       builder: (context, setState) {
         bool isComplate = todo.isComplate;
-        
+
         return Padding(
           padding: const EdgeInsets.all(20),
           child: Form(
@@ -27,13 +28,15 @@ void showTodoDetail({required Todo todo, required BuildContext context}) {
                   controller: txtTitleController,
                   decoration: const InputDecoration(labelText: 'Todo Title'),
                 ),
-                const Divider(),
+                const SizedBox(height: 15,),
                 TextFormField(
                   controller: txtContentController,
                   decoration: const InputDecoration(labelText: 'Todo Content'),
                 ),
-                const Divider(),
-                Checkbox(
+                const SizedBox(height: 15,),
+                Row(children: [
+                  const Text('Complate :'),
+                  Checkbox(
                   value: isComplate,
                   onChanged: (value) {
                     setState(() {
@@ -48,6 +51,8 @@ void showTodoDetail({required Todo todo, required BuildContext context}) {
                     });
                   },
                 ),
+                ],),
+                
                 const SizedBox(height: 10),
                 // 작성일 표시
                 Row(
@@ -69,7 +74,7 @@ void showTodoDetail({required Todo todo, required BuildContext context}) {
                         child: Text(
                           selectedDate != null
                               ? '${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')} '
-                                  '${selectedDate!.hour.toString().padLeft(2, '0')}:${selectedDate!.minute.toString().padLeft(2, '0')}'
+                                    '${selectedDate!.hour.toString().padLeft(2, '0')}:${selectedDate!.minute.toString().padLeft(2, '0')}'
                               : '미설정',
                           style: TextStyle(
                             color: selectedDate != null ? Colors.black : Colors.grey,
@@ -115,6 +120,13 @@ void showTodoDetail({required Todo todo, required BuildContext context}) {
                     ],
                   ),
                 ],
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    TextButton(onPressed: () {}, child: const Text('취소')),
+                    TextButton(onPressed: () {}, child: const Text('저장')),
+                  ],
+                ),
               ],
             ),
           ),

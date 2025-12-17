@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_provider_ex01/provider/todo_provider.dart';
-import 'package:flutter_provider_ex01/view/home.dart';
+import 'package:flutter_provider_ex01/view/todo_list.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -11,5 +11,9 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) => const Home();
+  Widget build(BuildContext context) => MaterialApp(
+    title: 'TODO',
+    theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+    home: const TodoList(),
+  );
 }

@@ -15,8 +15,23 @@ class TodoProvider extends ChangeNotifier {
   /// 새로운 할 일(todo)을 [todoList]에 추가합니다.
   /// 추가 성공 시 true, 실패 시 false를 반환합니다.
   /// 추가 후 리스너에게 변경 사항을 알립니다.
-  bool addToTodoList({required Todo todo}) {
+  bool addToTodoList({required String title, required String content}) {
     try {
+      int todoId = 0;
+      if (todoList.length > 0) {
+        todoId = todoList.map((t) => t.id).reduce((a, b) => a > b ? a : b) + 1;
+      } else {
+        todoId = 1;
+      }
+
+      final Todo todo = Todo(
+        id: todoId,
+        todoTitle: title,
+        todoContent: content,
+        isComplate: false,
+        todoWriteDate: DateTime.now(),
+      );
+
       todoList.add(todo);
       notifyListeners(); // 변경 알림
       return true;
