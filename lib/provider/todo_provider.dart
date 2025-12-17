@@ -7,6 +7,8 @@ class TodoProvider extends ChangeNotifier {
   /// 전체 할 일 목록을 저장하는 리스트입니다.
   List<Todo> todoList = [];
 
+  int get listLength => todoList.length;
+
   /// (기능 구현 예정) todo의 id를 증가시키는 메서드입니다.
   void incrementId() {}
 
