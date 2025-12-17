@@ -3,13 +3,30 @@ import 'package:flutter_provider_ex01/models/todo.dart';
 import 'package:flutter_provider_ex01/provider/todo_provider.dart';
 import 'package:provider/provider.dart';
 
+/// showUpdateTodoBottomSheet
+/// - 특정 Todo 항목의 내용을 수정할 수 있는 Modal Bottom Sheet를 표시합니다.
+/// - [todo]: 수정 대상 Todo 객체
+/// - [context]: BuildContext
+/// 
+/// [기능 상세]
+/// 1. 제목, 내용은 텍스트 입력 폼으로 초기값 세팅(기존값)
+/// 2. 'Complate' 체크박스: 완료 여부 수정
+///    - 체크/해제 시 완료일(selectedDate) 관리
+/// 3. 완료 체크 시 '완료일' 필드와 날짜/시간 선택 버튼 노출
+///    - 버튼 클릭 시 DatePicker 및 TimePicker 연동으로 날짜/시간 설정
+/// 4. 하단에 [취소], [수정] 버튼 배치
+///    - [취소]: BottomSheet 닫기(수정 미적용)
+///    - [수정]: 제목/내용/상태 정보를 반영하여 수정 Provider 호출, BottomSheet 닫기
+/// 5. 작성일 영역은 단순 텍스트로 표시(수정 불가)
 void showUpdateTodoBottomSheet({required Todo todo, required BuildContext context}) {
   final formKey = GlobalKey<FormState>();
+
+  // 텍스트 입력 컨트롤러에 기존 Todo 데이터 할당
   final TextEditingController txtTitleController = TextEditingController(text: todo.todoTitle);
   final TextEditingController txtContentController = TextEditingController(
     text: todo.todoContent,
   );
-  // StatefulBuilder 외부에서 상태 변수 선언 (상태 유지)
+  // StatefulBuilder 외부에서 상태 변수 선언 (상태 유지 목적)
   bool isComplate = todo.isComplate;
   DateTime? selectedDate = todo.todoComplateDate;
 
@@ -27,16 +44,19 @@ void showUpdateTodoBottomSheet({required Todo todo, required BuildContext contex
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
+                // 제목 입력 폼
                 TextFormField(
                   controller: txtTitleController,
                   decoration: const InputDecoration(labelText: 'Todo Title'),
                 ),
                 const SizedBox(height: 15),
+                // 내용 입력 폼
                 TextFormField(
                   controller: txtContentController,
                   decoration: const InputDecoration(labelText: 'Todo Content'),
                 ),
                 const SizedBox(height: 15),
+                // 완료 체크박스
                 Row(
                   children: [
                     const Text('Complate :'),
@@ -45,11 +65,10 @@ void showUpdateTodoBottomSheet({required Todo todo, required BuildContext contex
                       onChanged: (value) {
                         setState(() {
                           isComplate = value ?? false;
-                          // 완료 체크 해제 시 완료일도 초기화
+                          // 완료 체크 해제 시 완료일 초기화, 체크 시 현재 시간 할당(없을 때)
                           if (!isComplate) {
                             selectedDate = null;
                           } else {
-                            // 완료 체크 시 완료일이 없으면 현재 시간으로 설정
                             selectedDate = DateTime.now();
                           }
                         });
@@ -57,9 +76,8 @@ void showUpdateTodoBottomSheet({required Todo todo, required BuildContext contex
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 10),
-                // 작성일 표시
+                // 작성일 표시 영역(수정 불가)
                 Row(
                   children: [
                     const Text('작성일: '),
@@ -69,7 +87,7 @@ void showUpdateTodoBottomSheet({required Todo todo, required BuildContext contex
                     ),
                   ],
                 ),
-                // 완료일 표시 및 선택 (isComplate가 true일 때만 표시)
+                // 완료 상태면 완료일 선택 및 표시 UI 추가
                 if (isComplate) ...[
                   const SizedBox(height: 10),
                   Row(
@@ -77,7 +95,7 @@ void showUpdateTodoBottomSheet({required Todo todo, required BuildContext contex
                       const Text('완료일: '),
                       ElevatedButton.icon(
                         onPressed: () async {
-                          // DatePicker 표시 (bottomSheetContext 사용)
+                          // (1) 완료날짜 선택(DatePicker)
                           final DateTime? pickedDate = await showDatePicker(
                             context: bottomSheetContext,
                             initialDate: selectedDate ?? DateTime.now(),
@@ -85,16 +103,14 @@ void showUpdateTodoBottomSheet({required Todo todo, required BuildContext contex
                             lastDate: DateTime(2100),
                             locale: const Locale('ko', 'KR'),
                           );
-
                           if (pickedDate != null) {
-                            // TimePicker 표시 (bottomSheetContext 사용)
+                            // (2) 완료시간 선택(TimePicker)
                             final TimeOfDay? pickedTime = await showTimePicker(
                               context: bottomSheetContext,
                               initialTime: selectedDate != null
                                   ? TimeOfDay.fromDateTime(selectedDate!)
                                   : TimeOfDay.now(),
                             );
-
                             if (pickedTime != null) {
                               setState(() {
                                 selectedDate = DateTime(
@@ -115,9 +131,11 @@ void showUpdateTodoBottomSheet({required Todo todo, required BuildContext contex
                   ),
                 ],
                 const SizedBox(height: 20),
+                // 하단 버튼 영역
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
+                    // 취소 버튼: BottomSheet 닫기
                     ElevatedButton(
                       onPressed: () {
                         Navigator.pop(bottomSheetContext);
@@ -125,6 +143,7 @@ void showUpdateTodoBottomSheet({required Todo todo, required BuildContext contex
                       child: const Text('취소'),
                     ),
                     const SizedBox(width: 15),
+                    // 수정 버튼: 입력값 토대로 Todo 수정, BottomSheet 닫기
                     ElevatedButton(
                       onPressed: () {
                         final Todo updateTodo = Todo(
@@ -135,7 +154,6 @@ void showUpdateTodoBottomSheet({required Todo todo, required BuildContext contex
                           todoWriteDate: todo.todoWriteDate,
                           todoComplateDate: isComplate ? selectedDate : null,
                         );
-
                         provider.modifyToTodoList(todo: updateTodo);
                         Navigator.pop(bottomSheetContext);
                       },
